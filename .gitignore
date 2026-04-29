@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.DS_Store
+data/
+results/
+*.wav
+*.mp4
+*.mov
+*.m4a
+*.mp3
+*.ass
+*.srt
+*_clips/
+whisper-models/

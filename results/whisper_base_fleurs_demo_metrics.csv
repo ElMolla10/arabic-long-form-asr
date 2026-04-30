@@ -1,0 +1,2 @@
+id,system,wer_raw,wer_normalized,cer_normalized
+fleurs_arabic_demo,whisper_base_fleurs_demo,0.5659574468085107,0.4978723404255319,0.21090259159964253

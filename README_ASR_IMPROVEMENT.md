@@ -13,7 +13,7 @@ This project should be presented as an Arabic ASR improvement project first. The
 | Context continuity | Implemented with overlap plus previous transcript context via `--context-words`. |
 | Post-processing | Implemented through overlap de-duplication, transcript merging, whitespace cleanup, and light punctuation cleanup. |
 | Literature comparison | Included below and should be discussed in the report. |
-| Case study | Recommended case study: religious lecture / khutbah or university lecture recording. |
+| Case study | Completed controlled 30.07-minute Arabic FLEURS long-form benchmark; the same pipeline can be applied to a lecture, khutbah, podcast, interview, or audiobook. |
 
 ## Main Research Question
 
@@ -41,16 +41,18 @@ The baseline metrics should be reported before any improved model results.
 
 ## Structured Experiments
 
-Run controlled experiments where only one major variable changes at a time.
+Run controlled experiments where only one major variable changes at a time. The completed experiments are:
 
-| Experiment | Model / Data | Augmentation | Preprocessing | Purpose |
-|---|---:|---:|---:|---|
-| E0 Baseline | Whisper original | No | Basic audio conversion | Establish starting WER/CER |
-| E1 Small fine-tune | 1 hour Arabic data | No | Arabic normalization | Test whether small fine-tuning helps |
-| E2 Medium fine-tune | 3-5 hours Arabic data | No | Arabic normalization | Test effect of more training data |
-| E3 Augmented | Same as E2 | Yes | Arabic normalization | Test robustness from noise/speed/volume augmentation |
-| E4 Preprocessing variant | Best model | Same as best | normalization on/off | Measure Arabic text preprocessing effect |
-| E5 Long-form audio | Best model | Same as best | chunk + reconstruct | Verify performance on long lectures/podcasts |
+| Experiment | Configuration | Purpose | Status |
+|---|---|---|---|
+| E0 | Whisper baseline on 30.07-minute FLEURS benchmark | Establish long-form baseline | Completed |
+| E1 | 60s chunks, 2s overlap, no context | Test chunking without context propagation | Completed |
+| E2 | 60s chunks, 2s overlap, 24-word prompt context | Test context continuity | Completed |
+| E3 | 30s chunks vs 60s chunks | Test chunk-size effect | Completed |
+| E4 | Whisper fine-tune, 50 training samples | Test small-data fine-tuning | Completed |
+| E5 | Whisper fine-tune, 150 training samples | Test effect of more Arabic training data | Completed |
+| E6 | Whisper fine-tune, 150 samples + augmentation | Test augmentation robustness | Completed |
+| E7 | Raw WER vs normalized WER | Measure Arabic normalization effect | Completed |
 
 ## Arabic Text Normalization
 
@@ -121,14 +123,29 @@ Report at minimum:
 - Number of evaluated files.
 - Examples of errors and qualitative analysis.
 
-Suggested results table:
+Completed long-form results:
 
-| System | Train data | Augmentation | Normalization | WER | CER | Notes |
-|---|---:|---:|---:|---:|---:|---|
-| Whisper baseline | 0h | No | Yes |  |  | Before fine-tuning |
-| Fine-tuned small | 1h | No | Yes |  |  |  |
-| Fine-tuned medium | 3-5h | No | Yes |  |  |  |
-| Fine-tuned + augmentation | 3-5h | Yes | Yes |  |  |  |
+| System | Chunk Size | Overlap | Prompt Context | Raw WER | Normalized WER | Normalized CER |
+|---|---:|---:|---:|---:|---:|---:|
+| `whisper_base_30min_no_context` | 60s | 2s | No | 0.5414 | **0.4926** | **0.2069** |
+| `whisper_base_30min_context` | 60s | 2s | 24 words | 0.6250 | 0.5645 | 0.3259 |
+| `whisper_base_30min_no_context_30s` | 30s | 2s | No | 0.5621 | 0.5153 | 0.2402 |
+
+Completed fine-tuning results:
+
+| Experiment | Train Samples | Augmentation | Eval Loss | Raw WER | Normalized WER | Normalized CER |
+|---|---:|---:|---:|---:|---:|---:|
+| E4 Small fine-tune | 50 | No | 2.0174 | 0.2899 | 0.2671 | 0.0675 |
+| E5 Larger fine-tune | 150 | No | **1.6712** | **0.2769** | **0.2508** | **0.0618** |
+| E6 Larger fine-tune + augmentation | 150 | Yes | 1.6823 | **0.2769** | **0.2508** | **0.0618** |
+
+Main analysis:
+
+- Best long-form configuration: 60-second chunks, 2-second overlap, no prompt context.
+- Prompt context worsened WER/CER, likely due to error propagation.
+- Arabic normalization reduced measured WER for all long-form systems.
+- E5 improved over E4, showing that more Arabic fine-tuning data improved held-out validation performance.
+- E6 matched E5 on WER/CER but had slightly worse validation loss, so this augmentation setup did not add measurable benefit.
 
 ## How the Clipper Fits
 

@@ -1,8 +1,16 @@
 __pycache__/
 *.pyc
 .DS_Store
-data/
-results/
+data/**/*.wav
+data/**/*.mp3
+data/**/*.m4a
+data/**/*.mp4
+data/**/*.mov
+data/hf_cache/
+data/fleurs_ar_eg_dev_audio/
+data/longform/
+data/*concat_list.txt
+results/checkpoint-*/
 *.wav
 *.mp4
 *.mov
@@ -12,3 +20,4 @@ results/
 *.srt
 *_clips/
 whisper-models/
+models/

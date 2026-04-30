@@ -6,6 +6,48 @@ Modern Whisper-based ASR systems work best on short windows of audio. This proje
 
 The clip generation script is included as an optional downstream demo, but the main project evaluation is based on transcription quality.
 
+## Final Results Summary
+
+The project now includes both pipeline-level long-form experiments and model-level fine-tuning experiments.
+
+### 30+ Minute Long-Form Benchmark
+
+- Dataset: Google FLEURS Arabic Egypt validation split.
+- Construction: 167 validation clips concatenated into one long WAV file.
+- Duration: 1804.44 seconds = 30.07 minutes.
+- Reference: official FLEURS transcripts concatenated in the same order.
+- Reference size: 3,035 words / 17,717 characters.
+- ASR model for local long-form tests: whisper.cpp `ggml-base.bin`.
+
+| System | Chunk Size | Overlap | Context | Raw WER | Normalized WER | Normalized CER |
+|---|---:|---:|---:|---:|---:|---:|
+| `whisper_base_30min_no_context` | 60s | 2s | No | 0.5414 | **0.4926** | **0.2069** |
+| `whisper_base_30min_context` | 60s | 2s | 24 words | 0.6250 | 0.5645 | 0.3259 |
+| `whisper_base_30min_no_context_30s` | 30s | 2s | No | 0.5621 | 0.5153 | 0.2402 |
+
+Best long-form setting: **60-second chunks, 2-second overlap, no prompt context**.
+
+### Fine-Tuning Experiments
+
+Fine-tuning experiments were run on Kaggle GPU with FLEURS Arabic Egypt. Evaluation used 20 held-out validation samples.
+
+| Experiment | Train Samples | Augmentation | Eval Loss | Raw WER | Normalized WER | Normalized CER |
+|---|---:|---:|---:|---:|---:|---:|
+| E4 Small fine-tune | 50 | No | 2.0174 | 0.2899 | 0.2671 | 0.0675 |
+| E5 Larger fine-tune | 150 | No | **1.6712** | **0.2769** | **0.2508** | **0.0618** |
+| E6 Larger fine-tune + augmentation | 150 | Yes | 1.6823 | **0.2769** | **0.2508** | **0.0618** |
+
+Best model-level result: **E5 larger fine-tune**. Increasing training data from 50 to 150 samples improved WER/CER. The augmentation configuration used in E6 did not improve WER/CER over E5.
+
+### Key Findings
+
+- The pipeline successfully handles a 30+ minute Arabic ASR benchmark.
+- Arabic normalization reduced measured WER for every long-form system.
+- Prompt context did not help in these experiments; it likely propagated recognition errors.
+- 60-second chunks performed better than 30-second chunks for the long-form benchmark.
+- Fine-tuning improved Arabic ASR quality on held-out FLEURS validation samples.
+- MALIK/clipper is a downstream bonus component; the main evaluation is ASR quality.
+
 ## Project Objectives
 
 - Define a clear Whisper baseline before improvement.
@@ -22,11 +64,15 @@ The clip generation script is included as an optional downstream demo, but the m
 | File | Purpose |
 |---|---|
 | `Arabic_Long_Form_ASR_Improvement.ipynb` | Notebook version of the project with logical cells for presentation and grading |
+| `Whisper_Fine_Tuning_Experiments_E4_E6.ipynb` | Colab-ready notebook for fine-tuning experiments E4-E6 |
 | `asr_experiments.py` | Main ASR experiment pipeline: manifest creation, long-form transcription, Arabic normalization, WER/CER evaluation |
 | `clipper.py` | Optional bonus component for creating captioned media clips from transcripts |
 | `README_ASR_IMPROVEMENT.md` | Detailed ASR experiment plan and requirement mapping |
 | `requirements.txt` | Python dependencies |
 | `DEMO.md` | Presentation demo steps |
+| `RESULTS_DEMO.md` | Actual local demo results from a public Arabic FLEURS sample |
+| `RESULTS_LONGFORM_30MIN.md` | Actual 30+ minute long-form evaluation results |
+| `Arabic_LongForm_ASR_Pipeline.pptx` | Presentation deck, if included in the repository |
 
 ## Requirements
 
@@ -117,18 +163,20 @@ python asr_experiments.py evaluate \
 
 ## Structured Experiments
 
-Recommended experiments:
+Completed experiments:
 
-| Experiment | Description |
-|---|---|
-| E0 | Whisper baseline before fine-tuning |
-| E1 | Smaller dataset fine-tuning |
-| E2 | Larger dataset fine-tuning |
-| E3 | Fine-tuning with augmentation |
-| E4 | Arabic normalization on/off comparison |
-| E5 | Long-form transcription with chunking/context reconstruction |
+| Experiment | Description | Status |
+|---|---|---|
+| E0 | Whisper baseline / long-form benchmark | Completed |
+| E1 | 60s chunking without prompt context | Completed |
+| E2 | 60s chunking with 24-word prompt context | Completed |
+| E3 | 30s vs 60s chunk-size comparison | Completed |
+| E4 | Small fine-tuned model, 50 samples | Completed |
+| E5 | Larger fine-tuned model, 150 samples | Completed |
+| E6 | Larger fine-tuned model with augmentation | Completed |
+| E7 | Arabic normalization on/off comparison | Completed |
 
-Report WER and CER for every experiment.
+WER and CER are reported in `RESULTS_LONGFORM_30MIN.md`.
 
 ## Arabic Normalization
 

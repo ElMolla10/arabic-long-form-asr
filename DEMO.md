@@ -20,7 +20,7 @@ Explain that Whisper works on short windows, while the project target is long-fo
 
 ### 2. Show the Input
 
-Use a short excerpt during the live demo, for example 2-5 minutes, but explain that the same pipeline is designed for 30+ minute files.
+Use the prepared 30+ minute benchmark results for the main demo. If live time is limited, run a short excerpt live and show the saved 30.07-minute result files.
 
 Example manifest:
 
@@ -79,14 +79,23 @@ python asr_experiments.py evaluate \
   --csv results/demo_improved_metrics.csv
 ```
 
-### 6. Present Results Table
+### 6. Present Long-Form Results
 
-Use a table like this:
+Use this completed 30+ minute results table:
 
-| System | Chunking | Context | Normalization | WER | CER |
-|---|---|---|---|---:|---:|
-| Whisper baseline | Yes | Yes | Yes |  |  |
-| Improved model | Yes | Yes | Yes |  |  |
+| System | Chunk Size | Overlap | Context | Raw WER | Normalized WER | Normalized CER |
+|---|---:|---:|---:|---:|---:|---:|
+| 60s chunks, no context | 60s | 2s | No | 0.5414 | 0.4926 | 0.2069 |
+| 60s chunks, 24-word context | 60s | 2s | Yes | 0.6250 | 0.5645 | 0.3259 |
+| 30s chunks, no context | 30s | 2s | No | 0.5621 | 0.5153 | 0.2402 |
+
+Then show the fine-tuning results:
+
+| Experiment | Train Samples | Augmentation | Normalized WER | Normalized CER |
+|---|---:|---:|---:|---:|
+| E4 Small fine-tune | 50 | No | 0.2671 | 0.0675 |
+| E5 Larger fine-tune | 150 | No | 0.2508 | 0.0618 |
+| E6 Larger + augmentation | 150 | Yes | 0.2508 | 0.0618 |
 
 ### 7. Optional Bonus Demo
 
@@ -97,4 +106,3 @@ python clipper.py path/to/lecture.mp4 --test
 ```
 
 Explain that this is a downstream media application, while the main project result is ASR quality improvement.
-

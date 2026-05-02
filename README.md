@@ -206,10 +206,6 @@ The pipeline handles long recordings by:
 7. Reconstructing the final transcript.
 8. Applying light punctuation and spacing cleanup.
 
-## Demo
-
-See [DEMO.md](DEMO.md) for the presentation demo flow.
-
 ## Optional Bonus: Clip Generation
 
 `clipper.py` uses transcripts to create short captioned clips from long media files. This is useful for educational media reuse and social-media publishing, but it is not the main ASR evaluation component.

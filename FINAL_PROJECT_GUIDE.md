@@ -1,47 +1,145 @@
 # Final Project Guide
 
-Use this notebook as the main project notebook:
+## Project
+
+**Arabic Long-Form ASR Improvement in Modern Standard Arabic**
+
+Track:
+
+```text
+Group 2: Long-Form Transcription in Arabic (MSA)
+```
+
+Domain:
+
+```text
+Arabic media, education, broadcasting, lectures, interviews, and archived content
+```
+
+Main objective:
+
+```text
+Improve Arabic long-form transcription quality using Whisper adaptation, preprocessing, data augmentation, and WER/CER evaluation.
+```
+
+## Final Repository Contents
+
+| File / Folder | Purpose |
+|---|---|
+| `Arabic_ASR_Final_Project_Unified.ipynb` | Main final notebook. Use this for the demo and grading. |
+| `Arabic_LongForm_ASR_Pipeline.pptx` | Presentation deck. |
+| `README.md` | Detailed project explanation, results summary, commands, and background. |
+| `FINAL_PROJECT_GUIDE.md` | Short submission guide and file map. |
+| `requirements.txt` | Python dependencies. |
+| `asr_experiments.py` | Reusable command-line ASR pipeline for manifest creation, transcription, normalization, and WER/CER evaluation. |
+| `Clipper.py` | Optional downstream clip-generation component. |
+| `data/` | Demo and 30-minute long-form JSONL manifests. |
+| `results/` | Completed prediction and metric files for the ASR experiments. |
+
+## What To Submit
+
+Submit or share the GitHub repository:
+
+```text
+https://github.com/ElMolla10/arabic-long-form-asr
+```
+
+If only specific files are requested, submit:
 
 ```text
 Arabic_ASR_Final_Project_Unified.ipynb
+Arabic_LongForm_ASR_Pipeline.pptx
+README.md
+FINAL_PROJECT_GUIDE.md
+requirements.txt
+asr_experiments.py
+Clipper.py
+data/
+results/
 ```
-
-It combines the important code and explanation from the project into one structured notebook.
 
 ## Assignment Mapping
 
 | Requirement | Where It Is Covered |
 |---|---|
-| Select one project track | Section 1: Arabic Long-Form ASR in MSA |
-| Define real-world problem | Section 1: Problem Statement |
-| Build a complete pipeline | Sections 2, 7, 8, 9 |
-| Fine-tune Whisper on Arabic data | Sections 12, 14, 15 |
-| Try different dataset sizes | Sections 12 and 15 |
-| Apply augmentation | Section 13 |
-| Apply preprocessing | Sections 4 and 7 |
-| Evaluate using metrics | Sections 5, 10, 11, 15 |
-| Presentation/demo support | Sections 16 and 17 |
-| References | Section 18 |
+| Select one project track | Notebook title/introduction and this guide |
+| Define a real-world problem | Notebook problem statement and `README.md` |
+| Build a complete system pipeline | Notebook pipeline sections and `asr_experiments.py` |
+| Fine-tune Whisper on Arabic data | Notebook fine-tuning cells |
+| Try different dataset sizes | Notebook experiment setup and fine-tuning results |
+| Apply augmentation | Notebook augmentation section |
+| Apply preprocessing | Arabic normalization and audio preprocessing sections |
+| Evaluate using metrics | WER/CER sections and `results/` |
+| Deliver professional presentation | `Arabic_LongForm_ASR_Pipeline.pptx` |
+| Deliver demo | Notebook plus saved result files |
 
-## What To Run
-
-For a quick project demo:
+## Recommended Demo Flow
 
 1. Open `Arabic_ASR_Final_Project_Unified.ipynb`.
-2. Run sections 3 to 11 to show preprocessing, metrics, and existing result comparison.
-3. Use sections 12 to 15 to explain the fine-tuning experiments.
-4. Use section 17 as the presentation flow.
+2. Explain the problem: Arabic ASR underperforms because of limited labeled data and linguistic complexity.
+3. Show the system pipeline: audio preprocessing, chunking, Whisper transcription, normalization, and evaluation.
+4. Show Arabic normalization examples.
+5. Show WER and CER metric code.
+6. Show the completed results loaded from `results/`.
+7. Show the fine-tuning section and mention the Kaggle GPU run.
+8. Present the final findings.
+9. Open `Arabic_LongForm_ASR_Pipeline.pptx` for the formal presentation.
 
-## Existing Supporting Files
+## Running Locally
 
-| File | Purpose |
-|---|---|
-| `asr_experiments.py` | Main command-line ASR pipeline |
-| `Arabic_Long_Form_ASR_Improvement.ipynb` | Original long-form pipeline notebook |
-| `Whisper_Fine_Tuning_Experiments_E4_E6.ipynb` | Original fine-tuning notebook |
-| `results/` | Completed WER/CER experiment outputs |
-| `Arabic_LongForm_ASR_Pipeline.pptx` | Existing presentation deck |
+Install Python dependencies:
 
-## Important Note
+```bash
+pip install -r requirements.txt
+```
 
-The full Whisper fine-tuning cells are designed for GPU environments such as Colab or Kaggle. The notebook still includes the full structure, metrics, and completed result table so it can be presented even without rerunning expensive training locally.
+For the command-line ASR pipeline, system dependencies are also needed:
+
+```text
+ffmpeg
+ffprobe
+whisper.cpp with whisper-cli
+a Whisper model file, such as ggml-base.bin
+```
+
+Example evaluation command:
+
+```bash
+python asr_experiments.py evaluate \
+  --pred results/whisper_base_30min_no_context_predictions.jsonl \
+  --out results/check_metrics.json \
+  --csv results/check_metrics.csv
+```
+
+## Kaggle / Colab Notes
+
+For FLEURS loading, use a compatible Hugging Face datasets version:
+
+```python
+!pip uninstall -y datasets huggingface_hub
+!pip install -q --no-cache-dir "datasets==3.6.0" "huggingface_hub<1.0.0" transformers accelerate evaluate jiwer soundfile librosa audiomentations
+```
+
+Restart the runtime after installation, then load FLEURS with:
+
+```python
+from datasets import load_dataset
+
+dataset = load_dataset("google/fleurs", "ar_eg", trust_remote_code=True)
+```
+
+The full Whisper fine-tuning cells are designed for GPU environments such as Kaggle or Colab. The repository also includes completed metrics in `results/`, so the project can still be demonstrated without rerunning expensive training.
+
+## Final Result Summary
+
+Best long-form pipeline result in the saved benchmark:
+
+```text
+System: whisper_base_30min_no_context
+Chunk size: 60 seconds
+Overlap: 2 seconds
+Normalized WER: 0.4926
+Normalized CER: 0.2069
+```
+
+Fine-tuning experiments showed that increasing Arabic training data improved model-level WER/CER. The tested augmentation setup did not improve over the larger non-augmented fine-tune.

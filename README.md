@@ -1,14 +1,65 @@
 # Arabic Long-Form ASR Improvement Pipeline
 
-This project focuses on improving Arabic automatic speech recognition (ASR) for long-duration audio such as lectures, podcasts, khutbahs, interviews, and archived educational media.
+This project improves Arabic automatic speech recognition (ASR) for long-duration audio such as lectures, podcasts, khutbahs, interviews, educational videos, and broadcast archives.
 
-Modern Whisper-based ASR systems work best on short windows of audio. This project builds a robust long-form transcription pipeline that chunks long recordings, preserves context between chunks, reconstructs the final transcript, normalizes Arabic text, and evaluates transcription quality using WER and CER.
+Arabic ASR is harder than English ASR because high-quality labeled Arabic speech data is more limited, Arabic has rich morphology, and transcription can vary because of spelling forms, diacritics, dialect influence, and punctuation. This project focuses on Modern Standard Arabic (MSA) and builds a practical end-to-end pipeline using Whisper-based transcription, Arabic preprocessing, long-form chunking, adaptation experiments, and WER/CER evaluation.
 
-The clip generation script is included as an optional downstream demo, but the main project evaluation is based on transcription quality.
+## Final Deliverables
+
+| File / Folder | Purpose |
+|---|---|
+| `Arabic_ASR_Final_Project_Unified.ipynb` | Main final notebook for grading and demo. |
+| `Arabic_LongForm_ASR_Pipeline.pptx` | Presentation deck. |
+| `FINAL_PROJECT_GUIDE.md` | Short guide for submission, demo flow, and assignment mapping. |
+| `requirements.txt` | Python dependencies. |
+| `asr_experiments.py` | Command-line ASR pipeline for manifests, long-form transcription, normalization, and evaluation. |
+| `Clipper.py` | Optional downstream clip-generation component. |
+| `data/` | Demo and 30-minute long-form JSONL manifests. |
+| `results/` | Saved prediction and metric files from completed experiments. |
+
+## Project Objectives
+
+- Define a real-world Arabic long-form transcription problem.
+- Build a complete ASR system pipeline.
+- Fine-tune Whisper on Arabic data.
+- Compare different dataset sizes.
+- Apply data augmentation such as noise and speed perturbation.
+- Apply Arabic preprocessing and normalization.
+- Evaluate transcription quality using WER and CER.
+- Deliver a professional presentation and working demo.
+
+## System Pipeline
+
+```text
+Long Arabic Audio
+        |
+        v
+Audio Preprocessing
+16 kHz mono conversion, filtering, chunking
+        |
+        v
+Whisper ASR Baseline
+        |
+        v
+Arabic Text Normalization
+        |
+        v
+WER / CER Evaluation
+        |
+        v
+Adaptation Experiments
+dataset size + augmentation + fine-tuning
+        |
+        v
+Improved Whisper Model
+        |
+        v
+Final Transcript + Results Table
+```
 
 ## Final Results Summary
 
-The project now includes both pipeline-level long-form experiments and model-level fine-tuning experiments.
+The repository includes completed long-form pipeline experiments and model-level fine-tuning results.
 
 ### 30+ Minute Long-Form Benchmark
 
@@ -25,7 +76,11 @@ The project now includes both pipeline-level long-form experiments and model-lev
 | `whisper_base_30min_context` | 60s | 2s | 24 words | 0.6250 | 0.5645 | 0.3259 |
 | `whisper_base_30min_no_context_30s` | 30s | 2s | No | 0.5621 | 0.5153 | 0.2402 |
 
-Best long-form setting: **60-second chunks, 2-second overlap, no prompt context**.
+Best long-form setting:
+
+```text
+60-second chunks, 2-second overlap, no prompt context
+```
 
 ### Fine-Tuning Experiments
 
@@ -37,42 +92,22 @@ Fine-tuning experiments were run on Kaggle GPU with FLEURS Arabic Egypt. Evaluat
 | E5 Larger fine-tune | 150 | No | **1.6712** | **0.2769** | **0.2508** | **0.0618** |
 | E6 Larger fine-tune + augmentation | 150 | Yes | 1.6823 | **0.2769** | **0.2508** | **0.0618** |
 
-Best model-level result: **E5 larger fine-tune**. Increasing training data from 50 to 150 samples improved WER/CER. The augmentation configuration used in E6 did not improve WER/CER over E5.
+Best model-level result:
 
-### Key Findings
+```text
+E5 larger fine-tune
+```
+
+Increasing training data from 50 to 150 samples improved WER/CER. The augmentation configuration tested in E6 did not improve over E5.
+
+## Key Findings
 
 - The pipeline successfully handles a 30+ minute Arabic ASR benchmark.
 - Arabic normalization reduced measured WER for every long-form system.
 - Prompt context did not help in these experiments; it likely propagated recognition errors.
 - 60-second chunks performed better than 30-second chunks for the long-form benchmark.
 - Fine-tuning improved Arabic ASR quality on held-out FLEURS validation samples.
-- MALIK/clipper is a downstream bonus component; the main evaluation is ASR quality.
-
-## Project Objectives
-
-- Define a clear Whisper baseline before improvement.
-- Handle long-form Arabic audio of 30 minutes or more.
-- Segment audio into manageable chunks.
-- Preserve context continuity across chunks.
-- Merge and post-process transcripts.
-- Apply Arabic text normalization before evaluation.
-- Compare systems using WER and CER.
-- Present structured experiments with clear analysis.
-
-## Repository Contents
-
-| File | Purpose |
-|---|---|
-| `Arabic_Long_Form_ASR_Improvement.ipynb` | Notebook version of the project with logical cells for presentation and grading |
-| `Whisper_Fine_Tuning_Experiments_E4_E6.ipynb` | Colab-ready notebook for fine-tuning experiments E4-E6 |
-| `asr_experiments.py` | Main ASR experiment pipeline: manifest creation, long-form transcription, Arabic normalization, WER/CER evaluation |
-| `clipper.py` | Optional bonus component for creating captioned media clips from transcripts |
-| `README_ASR_IMPROVEMENT.md` | Detailed ASR experiment plan and requirement mapping |
-| `requirements.txt` | Python dependencies |
-| `DEMO.md` | Presentation demo steps |
-| `RESULTS_DEMO.md` | Actual local demo results from a public Arabic FLEURS sample |
-| `RESULTS_LONGFORM_30MIN.md` | Actual 30+ minute long-form evaluation results |
-| `Arabic_LongForm_ASR_Pipeline.pptx` | Presentation deck, if included in the repository |
+- `Clipper.py` is an optional downstream component; the main project evaluation is ASR quality.
 
 ## Requirements
 
@@ -82,53 +117,81 @@ Install Python dependencies:
 pip install -r requirements.txt
 ```
 
-System dependencies:
+System dependencies for local transcription:
 
-- `ffmpeg`
-- `ffprobe`
-- `whisper.cpp` with `whisper-cli`
-- A Whisper model file, for example `ggml-large-v3-turbo.bin`
+```text
+ffmpeg
+ffprobe
+whisper.cpp with whisper-cli
+a Whisper model file, such as ggml-base.bin
+```
+
+## Kaggle / Colab Setup
+
+For FLEURS, use `datasets<4` because `google/fleurs` relies on a dataset loading script.
+
+Run this once:
+
+```python
+!pip uninstall -y datasets huggingface_hub
+!pip install -q --no-cache-dir "datasets==3.6.0" "huggingface_hub<1.0.0" transformers accelerate evaluate jiwer soundfile librosa audiomentations
+```
+
+Then restart the runtime/session and load FLEURS with:
+
+```python
+from datasets import load_dataset
+
+dataset = load_dataset("google/fleurs", "ar_eg", trust_remote_code=True)
+```
 
 ## Dataset / Manifest Format
 
-Create a validation manifest as JSONL:
+The command-line pipeline uses JSONL manifests:
 
 ```json
-{"id": "lecture_001", "audio": "data/audio/lecture_001.mp4", "reference": "manually corrected Arabic transcript"}
+{"id": "lecture_001", "audio": "data/audio/lecture_001.wav", "reference": "manually corrected Arabic transcript"}
 ```
 
-Each line should contain:
+Each row contains:
 
-- `id`: unique sample ID
-- `audio`: path to audio/video file
-- `reference`: gold transcript for evaluation
+- `id`: unique sample ID.
+- `audio`: path to audio or video file.
+- `reference`: gold transcript for evaluation.
 
-You can also create a manifest from matching audio files and `.txt` references:
+Existing manifests:
+
+```text
+data/demo.jsonl
+data/longform_30min.jsonl
+```
+
+## Command-Line Usage
+
+Create a manifest from matching audio files and reference text files:
 
 ```bash
 python asr_experiments.py make-manifest \
   --audio-dir data/audio \
   --ref-dir data/references \
-  --audio-glob "*.mp4" \
+  --audio-glob "*.wav" \
   --out data/val.jsonl
 ```
 
-## Baseline Experiment
-
-Run Whisper before any fine-tuning or improvement:
+Run long-form transcription with whisper.cpp:
 
 ```bash
 python asr_experiments.py transcribe \
   --manifest data/val.jsonl \
-  --model ~/Documents/whisper-models/ggml-large-v3-turbo.bin \
+  --model /path/to/ggml-base.bin \
   --system-name whisper_baseline \
-  --chunk-seconds 30 \
+  --chunk-seconds 60 \
   --overlap-seconds 2 \
-  --context-words 24 \
+  --no-prompt-context \
   --out results/whisper_baseline_predictions.jsonl
 ```
 
-Evaluate:
+Evaluate predictions:
 
 ```bash
 python asr_experiments.py evaluate \
@@ -137,61 +200,30 @@ python asr_experiments.py evaluate \
   --csv results/whisper_baseline_metrics.csv
 ```
 
-## Improved Model Experiment
-
-Use the same evaluation manifest with the improved/fine-tuned model:
-
-```bash
-python asr_experiments.py transcribe \
-  --manifest data/val.jsonl \
-  --model path/to/improved-whisper-model.bin \
-  --system-name whisper_improved \
-  --chunk-seconds 30 \
-  --overlap-seconds 2 \
-  --context-words 24 \
-  --out results/whisper_improved_predictions.jsonl
-```
-
-Evaluate:
+Evaluate one of the saved result files:
 
 ```bash
 python asr_experiments.py evaluate \
-  --pred results/whisper_improved_predictions.jsonl \
-  --out results/whisper_improved_metrics.json \
-  --csv results/whisper_improved_metrics.csv
+  --pred results/whisper_base_30min_no_context_predictions.jsonl \
+  --out results/check_metrics.json \
+  --csv results/check_metrics.csv
 ```
-
-## Structured Experiments
-
-Completed experiments:
-
-| Experiment | Description | Status |
-|---|---|---|
-| E0 | Whisper baseline / long-form benchmark | Completed |
-| E1 | 60s chunking without prompt context | Completed |
-| E2 | 60s chunking with 24-word prompt context | Completed |
-| E3 | 30s vs 60s chunk-size comparison | Completed |
-| E4 | Small fine-tuned model, 50 samples | Completed |
-| E5 | Larger fine-tuned model, 150 samples | Completed |
-| E6 | Larger fine-tuned model with augmentation | Completed |
-| E7 | Arabic normalization on/off comparison | Completed |
-
-WER and CER are reported in `RESULTS_LONGFORM_30MIN.md`.
 
 ## Arabic Normalization
 
 The evaluator normalizes Arabic before scoring:
 
-- removes diacritics
-- removes tatweel
-- normalizes Alef variants to `ا`
-- normalizes `ى` to `ي`
-- normalizes `ة` to `ه`
-- normalizes hamza forms
-- removes punctuation
-- collapses whitespace
+- Removes diacritics.
+- Removes tatweel.
+- Normalizes Alef variants to `ا`.
+- Normalizes `ى` to `ي`.
+- Normalizes `ة` to `ه`.
+- Normalizes hamza forms.
+- Converts Arabic-Indic digits.
+- Removes punctuation.
+- Collapses whitespace.
 
-This makes evaluation more focused on word recognition quality instead of spelling variants.
+This makes evaluation focus more on recognition quality and less on spelling variants.
 
 ## Long-Form Audio Strategy
 
@@ -200,12 +232,22 @@ The pipeline handles long recordings by:
 1. Converting input to 16 kHz mono audio.
 2. Splitting audio into fixed-length chunks.
 3. Adding overlap between chunks.
-4. Passing previous transcript words as prompt context.
+4. Optionally passing previous transcript words as prompt context.
 5. Transcribing each chunk.
 6. Removing duplicate overlap text.
 7. Reconstructing the final transcript.
 8. Applying light punctuation and spacing cleanup.
 
+## Demo Flow
+
+1. Open `Arabic_ASR_Final_Project_Unified.ipynb`.
+2. Explain the Arabic ASR problem.
+3. Show the pipeline and normalization examples.
+4. Show WER/CER evaluation.
+5. Show results loaded from `results/`.
+6. Discuss the fine-tuning experiments and Kaggle GPU run.
+7. Present `Arabic_LongForm_ASR_Pipeline.pptx`.
+
 ## Optional Bonus: Clip Generation
 
-`clipper.py` uses transcripts to create short captioned clips from long media files. This is useful for educational media reuse and social-media publishing, but it is not the main ASR evaluation component.
+`Clipper.py` uses transcripts to create short captioned clips from long media files. This can support educational media reuse or social-media publishing, but it is not the main ASR evaluation component.
